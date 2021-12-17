@@ -18,6 +18,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends AppCompatActivity implements GLSurfaceView.Renderer {
 
+    private final static String TAG = "Demo1";
     private GLSurfaceView surfaceView = null;
 
     private static final String vertexShaderResouorce =
@@ -79,28 +80,11 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //设置清空屏幕后的背景色
         GLES20.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-        int[] compiled = new int[1];
         //构建顶点着色器
-        int vertexShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
-        GLES20.glShaderSource(vertexShader, vertexShaderResouorce);
-        GLES20.glCompileShader(vertexShader);
-
-        //获取编译后着色器句柄存在在compiled数组容器中
-        GLES20.glGetShaderiv(vertexShader, GLES20.GL_COMPILE_STATUS, compiled, 0);
-        if(compiled[0] == 0) {
-            Log.d("DEMO_TAG", "onSurfaceCreated: " + GLES20.glGetShaderInfoLog(vertexShader));
-        }
+        int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderResouorce);
 
         //构建片段着色器
-        int fragmentShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
-        GLES20.glShaderSource(fragmentShader, fragmentShaderResource);
-        GLES20.glCompileShader(fragmentShader);
-
-        //获取编译后着色器句柄存在在compiled数组容器中
-        GLES20.glGetShaderiv(fragmentShader, GLES20.GL_COMPILE_STATUS, compiled, 0);
-        if(compiled[0] == 0) {
-            Log.d("DEMO_TAG", "onSurfaceCreated: " + GLES20.glGetShaderInfoLog(fragmentShader));
-        }
+        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderResource);
 
         //构建着色器程序，并将顶点着色器和片段着色器链接进来
         vertexProgram = GLES20.glCreateProgram();
@@ -164,5 +148,22 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     protected void onDestroy() {
         super.onDestroy();
         GLES20.glDeleteProgram(vertexProgram);
+    }
+
+    public int loadShader(int shaderType, String source){
+        int shader = GLES20.glCreateShader(shaderType);
+        if(0 != shader){
+            GLES20.glShaderSource(shader, source);
+            GLES20.glCompileShader(shader);
+            int[] compiled = new int[1];
+            GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compiled, 0);
+            if(compiled[0] == 0){
+                Log.d(TAG, "loadShader: Could not compile shader:"+shaderType);
+                Log.d(TAG, "loadShader: "+ GLES20.glGetShaderInfoLog(shader));
+                GLES20.glDeleteShader(shader);
+                shader = 0;
+            }
+        }
+        return shader;
     }
 }
