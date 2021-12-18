@@ -10,9 +10,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -77,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     };
 
     //八个顶点颜色：r,g,b,a
-    float cubeColor[] = {
+    final float cubeColor[] = {
             1f,0f,0f,1f,        //红色
             0f,1f,0f,1f,        //绿色
             0f,0f,1f,1f,        //蓝色
@@ -88,8 +90,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             1f,1f,1f,1f,        //白色
     };
 
-    private int mPositionHandle;
-    private int mColorHandle;
     private int mProgram;
 
     private FloatBuffer vertexBuffer;
@@ -99,14 +99,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     private float[] mViewMatrix = new float[16];
     private float[] mProjectMatrix = new float[16];
     private float[] mMVPMatrix = new float[16];
-
-    private int mMatrixHandler;
-
-    final int COORDS_PER_VERTEX = 3;
-    //顶点个数
-    private final int vertexCount = cubePositions.length / COORDS_PER_VERTEX;
-    //顶点之间的偏移量
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 每个顶点四个字节
 
     private GLSurfaceView mSurfaceView = null;
 
@@ -197,17 +189,17 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glUseProgram(mProgram);
         //写入变换矩阵、顶点坐标数据及颜色数据
         //获取变换矩阵vMatrix成员句柄
-        mMatrixHandler= GLES20.glGetUniformLocation(mProgram, "vMatrix");
+        int mMatrixHandler= GLES20.glGetUniformLocation(mProgram, "vMatrix");
         //指定vMatrix的值
         GLES20.glUniformMatrix4fv(mMatrixHandler, 1, false, mMVPMatrix, 0);
         //获取顶点着色器的vPosition成员句柄
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         //启用三角形顶点的句柄
         GLES20.glEnableVertexAttribArray(mPositionHandle);
         //准备三角形的坐标数据
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+        GLES20.glVertexAttribPointer(mPositionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
         //获取片元着色器的vColor成员的句柄
-        mColorHandle = GLES20.glGetAttribLocation(mProgram, "aColor");
+        int mColorHandle = GLES20.glGetAttribLocation(mProgram, "aColor");
         //设置绘制三角形的颜色
         GLES20.glUniform4fv(mColorHandle, 2, cubeColor, 0);
         GLES20.glEnableVertexAttribArray(mColorHandle);
