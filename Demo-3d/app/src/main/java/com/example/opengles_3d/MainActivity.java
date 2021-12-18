@@ -3,19 +3,15 @@ package com.example.opengles_3d;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
-import android.view.View;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -32,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             "attribute vec4 aColor;" +
             "void main() {" +
             "  gl_Position = vMatrix*vPosition;" +
-            "  vColor=aColor;"+
+            "  vColor = aColor;"+
             "}";
 
     private final String fragmentShaderCode =
@@ -42,29 +38,32 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             "  gl_FragColor = vColor;" +
             "}";
 
-    private int mProgram;
-
-    final int COORDS_PER_VERTEX = 3;
     final float cubePositions[] = {
-            -1.0f,1.0f,1.0f,    //正面左上0
-            -1.0f,-1.0f,1.0f,   //正面左下1
-            1.0f,-1.0f,1.0f,    //正面右下2
-            1.0f,1.0f,1.0f,     //正面右上3
-            -1.0f,1.0f,-1.0f,    //反面左上4
-            -1.0f,-1.0f,-1.0f,   //反面左下5
-            1.0f,-1.0f,-1.0f,    //反面右下6
-            1.0f,1.0f,-1.0f,     //反面右上7
+            -1.0f,1.0f,1.0f,        //正面左上0
+            -1.0f,-1.0f,1.0f,       //正面左下1
+            1.0f,-1.0f,1.0f,        //正面右下2
+            1.0f,1.0f,1.0f,         //正面右上3
+            -1.0f,1.0f,-1.0f,       //反面左上4
+            -1.0f,-1.0f,-1.0f,      //反面左下5
+            1.0f,-1.0f,-1.0f,       //反面右下6
+            1.0f,1.0f,-1.0f,        //反面右上7
     };
-    final short index[]={
-            6,7,4,6,4,5,    //后面
-            6,3,7,6,2,3,    //右面
-            6,5,1,6,1,2,    //下面
-            0,3,2,0,2,1,    //正面
-            0,1,5,0,5,4,    //左面
-            0,7,3,0,4,7,    //上面
+    final short cubeIndex[]={
+            6,7,4,            //后面
+            6,4,5,            //后面
+            6,3,7,            //右面
+            6,2,3,            //右面
+            6,5,1,            //下面
+            6,1,2,            //下面
+            0,3,2,            //正面
+            0,2,1,            //正面
+            0,1,5,            //左面
+            0,5,4,            //左面
+            0,7,3,            //上面
+            0,4,7,            //上面
     };
 
-    float color[] = {
+    float cubeColor[] = {
             0f,1f,0f,1f,
             0f,1f,0f,1f,
             0f,1f,0f,1f,
@@ -77,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     private int mPositionHandle;
     private int mColorHandle;
+    private int mProgram;
 
     private float[] mViewMatrix = new float[16];
     private float[] mProjectMatrix = new float[16];
@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     private int mMatrixHandler;
 
+    final int COORDS_PER_VERTEX = 3;
     //顶点个数
     private final int vertexCount = cubePositions.length / COORDS_PER_VERTEX;
     //顶点之间的偏移量
@@ -123,16 +124,16 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         vertexBuffer.put(cubePositions);
         vertexBuffer.position(0);
 
-        ByteBuffer dd = ByteBuffer.allocateDirect(color.length * 4);
+        ByteBuffer dd = ByteBuffer.allocateDirect(cubeColor.length * 4);
         dd.order(ByteOrder.nativeOrder());
         colorBuffer = dd.asFloatBuffer();
-        colorBuffer.put(color);
+        colorBuffer.put(cubeColor);
         colorBuffer.position(0);
 
-        ByteBuffer cc= ByteBuffer.allocateDirect(index.length*2);
+        ByteBuffer cc= ByteBuffer.allocateDirect(cubeIndex.length * 2);
         cc.order(ByteOrder.nativeOrder());
         indexBuffer=cc.asShortBuffer();
-        indexBuffer.put(index);
+        indexBuffer.put(cubeIndex);
         indexBuffer.position(0);
 
     }
@@ -183,15 +184,15 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //启用三角形顶点的句柄
         GLES20.glEnableVertexAttribArray(mPositionHandle);
         //准备三角形的坐标数据
-        GLES20.glVertexAttribPointer(mPositionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, vertexBuffer);
         //获取片元着色器的vColor成员的句柄
         mColorHandle = GLES20.glGetAttribLocation(mProgram, "aColor");
         //设置绘制三角形的颜色
-        GLES20.glUniform4fv(mColorHandle, 2, color, 0);
+        GLES20.glUniform4fv(mColorHandle, 2, cubeColor, 0);
         GLES20.glEnableVertexAttribArray(mColorHandle);
-        GLES20.glVertexAttribPointer(mColorHandle,4, GLES20.GL_FLOAT,false,  0, colorBuffer);
+        GLES20.glVertexAttribPointer(mColorHandle,4, GLES20.GL_FLOAT,false, 0, colorBuffer);
         //索引法绘制正方体
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, index.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, cubeIndex.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
         //禁止顶点数组的句柄
         GLES20.glDisableVertexAttribArray(mPositionHandle);
 
@@ -205,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             int[] compiled=new int[1];
             GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS,compiled,0);
             if(compiled[0] == 0){
-//                glError(1,"Could not compile shader:"+shaderType);
+//                glError(1,"Could not compile shader: "+shaderType);
 //                glError(1,"GLES20 Error:"+ GLES20.glGetShaderInfoLog(shader));
                 GLES20.glDeleteShader(shader);
                 shader = 0;
