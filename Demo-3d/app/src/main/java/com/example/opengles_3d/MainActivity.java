@@ -10,6 +10,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
+import android.view.View;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     private final String vertexShaderCode =
             "attribute vec4 vPosition;" +
             "uniform mat4 vMatrix;" +
-            "varying  vec4 vColor;" +
+            "varying vec4 vColor;" +
             "attribute vec4 aColor;" +
             "void main() {" +
             "  gl_Position = vMatrix*vPosition;" +
@@ -133,6 +134,14 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         indexBuffer=cc.asShortBuffer();
         indexBuffer.put(index);
         indexBuffer.position(0);
+
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        //开启深度测试
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
         //创建一个空的OpenGLES程序
@@ -143,13 +152,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glAttachShader(mProgram, fragmentShader);
         //连接到着色器程序
         GLES20.glLinkProgram(mProgram);
-
-    }
-
-    @Override
-    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        //开启深度测试
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
     }
 
     @Override
