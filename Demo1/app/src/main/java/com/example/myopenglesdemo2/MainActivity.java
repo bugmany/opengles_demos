@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     private int vertexProgram;
 
-    private FloatBuffer fragmentFloatBuffer;
+    private FloatBuffer vertexFloatBuffer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //构建着色器程序，并将顶点着色器和片段着色器链接进来
         vertexProgram = GLES20.glCreateProgram();
         GLES20.glAttachShader(vertexProgram, vertexShader);
-        GLES20.glAttachShader(vertexProgram,fragmentShader);
+        GLES20.glAttachShader(vertexProgram, fragmentShader);
 
         int[] link = new int[1];
         GLES20.glLinkProgram(vertexProgram);
@@ -105,9 +105,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //转换为需要的顶点数据格式
         ByteBuffer buffer = ByteBuffer.allocateDirect(vertexCoords.length*4);
         buffer.order(ByteOrder.nativeOrder());
-        fragmentFloatBuffer = buffer.asFloatBuffer();
-        fragmentFloatBuffer.put(vertexCoords);
-        fragmentFloatBuffer.position(0);
+        vertexFloatBuffer = buffer.asFloatBuffer();
+        vertexFloatBuffer.put(vertexCoords);
+        vertexFloatBuffer.position(0);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glEnableVertexAttribArray(positionHandle);
         //设置顶点坐标数据
 //        GLES20.glVertexAttribIPointer(positionHandle, 3, GLES20.GL_FLOAT, 3 * 4, fragmentFloatBuffer);
-        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 3 * 4, fragmentFloatBuffer);
+        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 3 * 4, vertexFloatBuffer);
 
         //获取片元着色器的 vColor 成员句柄
         int colorHandle = GLES20.glGetUniformLocation(vertexProgram, "vColor");
