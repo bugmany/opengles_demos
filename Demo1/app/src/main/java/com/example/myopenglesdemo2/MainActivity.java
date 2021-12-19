@@ -17,15 +17,15 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends AppCompatActivity implements GLSurfaceView.Renderer {
-
     private final static String TAG = "Demo1";
+
     private GLSurfaceView surfaceView = null;
 
     private static final String vertexShaderResouorce =
             "attribute vec3 vPosition;" +
-                    "void main() {" +
-                    "   gl_Position = vec4(vPosition.x, vPosition.y, vPosition.z, 1.0);" +
-                    "}";
+            "void main() {" +
+            "   gl_Position = vec4(vPosition.x, vPosition.y, vPosition.z, 1.0);" +
+            "}";
 
     private final float[] vertexCoords = new float[] {
             0.0f, 0.5f, 0.0f,   //顶点
@@ -35,10 +35,10 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     private static final String fragmentShaderResource =
             "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "   gl_FragColor = vColor;" +
-                    "}";
+            "uniform vec4 vColor;" +
+            "void main() {" +
+            "   gl_FragColor = vColor;" +
+            "}";
 
     private final float color[] = {
             1.0f, 0.0f, 0.0f, 1.0f
