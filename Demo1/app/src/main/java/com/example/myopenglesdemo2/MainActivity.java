@@ -12,6 +12,7 @@ import android.view.SurfaceHolder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -22,9 +23,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     private GLSurfaceView surfaceView = null;
 
     private static final String vertexShaderResouorce =
-            "attribute vec3 vPosition;" +
+            "attribute vec4 vPosition;" +
             "void main() {" +
-            "   gl_Position = vec4(vPosition.x, vPosition.y, vPosition.z, 1.0);" +
+            "   gl_Position = vPosition;" +
             "}";
 
     private final float[] vertexCoords = new float[] {
@@ -44,9 +45,15 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             1.0f, 0.0f, 0.0f, 1.0f
             };
 
+//    //绘制三角形顺序, 暂时可以不用
+//    private static final short indices[] = {
+//            0,1,2
+//    };
+
     private int vertexProgram;
 
     private FloatBuffer vertexFloatBuffer;
+//    private ShortBuffer indicesShortBuffer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +115,12 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         vertexFloatBuffer = buffer.asFloatBuffer();
         vertexFloatBuffer.put(vertexCoords);
         vertexFloatBuffer.position(0);
+
+//        buffer = ByteBuffer.allocateDirect(indices.length*2);
+//        buffer.order(ByteOrder.nativeOrder());
+//        indicesShortBuffer = buffer.asShortBuffer();
+//        indicesShortBuffer.put(indices);
+//        indicesShortBuffer.position(0);
     }
 
     @Override
@@ -139,7 +152,10 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //设置颜色
         GLES20.glUniform4fv(colorHandle, 1, color, 0);
         //绘制三角形
+        //1.绘制的API还可以是glDrawArrays，这里不需要明确的设置绘制的顺序，而是通过绘制的模式来决定的
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 3);
+//        //2.通过glDrawElements方法绘制图形，glDrawElements需要使用到索引数组
+//        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 3, GLES20.GL_UNSIGNED_SHORT, indicesShortBuffer);
         //禁止顶点数组的句柄
         GLES20.glDisableVertexAttribArray(positionHandle);
     }
