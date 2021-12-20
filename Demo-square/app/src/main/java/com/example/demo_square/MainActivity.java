@@ -28,17 +28,17 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     private ShortBuffer indexBuffer;
     private final String vertexShaderCode =
             "attribute vec4 vPosition;" +
-                    "uniform mat4 vMatrix;"+
-                    "void main() {" +
-                    "  gl_Position = vMatrix*vPosition;" +
-                    "}";
+            "uniform mat4 vMatrix;"+
+            "void main() {" +
+            "  gl_Position = vMatrix * vPosition;" +
+            "}";
 
     private final String fragmentShaderCode =
             "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
+            "uniform vec4 vColor;" +
+            "void main() {" +
+            "  gl_FragColor = vColor;" +
+            "}";
 
     private int mProgram;
 
