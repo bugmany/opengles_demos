@@ -1,4 +1,4 @@
-#version 200
+#version 200 es
 layout (layout = 0) in vec4 vPosition;
 layout (layout = 0) in vec4 aColor;
 out vec4 vColor;

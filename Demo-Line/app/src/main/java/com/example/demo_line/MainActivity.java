@@ -106,10 +106,10 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         GLES20.glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
 
-//        String vertexShaderRes = getAssets().open("vertexShader.glsl").toString();
+//        String vertexShaderRes = ResourceUtils.readFile(this, "vertexShader.glsl");
         int vShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShader);
 
-//        String fragmentShaderRes = getAssets().open("fregmentShader.glsl").toString();
+//        String fragmentShaderRes = ResourceUtils.readFile(this, "fregmentShader.glsl");
         int fShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShader);
 
         mProgram = GLES20.glCreateProgram();
