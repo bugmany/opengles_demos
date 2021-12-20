@@ -76,18 +76,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ByteBuffer bb = ByteBuffer.allocateDirect(triangleCoords.length * 4);
-        bb.order(ByteOrder.nativeOrder());
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(triangleCoords);
-        vertexBuffer.position(0);
-
-        ByteBuffer cc= ByteBuffer.allocateDirect(index.length*2);
-        cc.order(ByteOrder.nativeOrder());
-        indexBuffer=cc.asShortBuffer();
-        indexBuffer.put(index);
-        indexBuffer.position(0);
-
         mSurfaceView = findViewById(R.id.glSurfaceView);
         mSurfaceView.setEGLContextClientVersion(2);
         mSurfaceView.setRenderer(this);
@@ -119,14 +107,26 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        //创建一个空的OpenGLES程序
-        mProgram = GLES20.glCreateProgram();
-        //将顶点着色器加入到程序
-        GLES20.glAttachShader(mProgram, vertexShader);
-        //将片元着色器加入到程序中
-        GLES20.glAttachShader(mProgram, fragmentShader);
-        //连接到着色器程序
-        GLES20.glLinkProgram(mProgram);
+        int[] shaderId = {vertexShader, fragmentShader};
+        int link = linkProgram(shaderId);
+        if(link == 0) {
+
+        }
+
+        //将程序加入到OpenGLES2.0环境
+        GLES20.glUseProgram(mProgram);
+
+        ByteBuffer bb = ByteBuffer.allocateDirect(triangleCoords.length * 4);
+        bb.order(ByteOrder.nativeOrder());
+        vertexBuffer = bb.asFloatBuffer();
+        vertexBuffer.put(triangleCoords);
+        vertexBuffer.position(0);
+
+        ByteBuffer cc= ByteBuffer.allocateDirect(index.length*2);
+        cc.order(ByteOrder.nativeOrder());
+        indexBuffer=cc.asShortBuffer();
+        indexBuffer.put(index);
+        indexBuffer.position(0);
     }
 
     @Override
@@ -140,31 +140,37 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //计算变换矩阵
         Matrix.multiplyMM(mMVPMatrix,0,mProjectMatrix,0,mViewMatrix,0);
 
-//        GLES20.glViewport(0, 0, width, height);
+        GLES20.glViewport(0, 0, width, height);
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
-        //将程序加入到OpenGLES2.0环境
-        GLES20.glUseProgram(mProgram);
+        //设置当前背景色
+        GLES20.glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
         //获取变换矩阵vMatrix成员句柄
         mMatrixHandler= GLES20.glGetUniformLocation(mProgram,"vMatrix");
         //指定vMatrix的值
-        GLES20.glUniformMatrix4fv(mMatrixHandler,1,false,mMVPMatrix,0);
+        GLES20.glUniformMatrix4fv(mMatrixHandler, 1, false, mMVPMatrix, 0);
+
         //获取顶点着色器的vPosition成员句柄
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-        //启用三角形顶点的句柄
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
         //准备三角形的坐标数据
         GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
+        //启用三角形顶点的句柄
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
+
         //获取片元着色器的vColor成员的句柄
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
         //设置绘制三角形的颜色
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+
         //绘制三角形
 //        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vertexCount);
         //索引法绘制正方形
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES,index.length, GLES20.GL_UNSIGNED_SHORT,indexBuffer);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, index.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+
         //禁止顶点数组的句柄
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
@@ -184,5 +190,24 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         }
 
         return shader;
+    }
+
+    public int linkProgram(int[] shaderId) {
+        int link = 0;
+        //创建一个空的OpenGLES程序
+        mProgram = GLES20.glCreateProgram();
+        for (int i = 0; i < shaderId.length; i++) {
+            GLES20.glAttachShader(mProgram, shaderId[i]);
+        }
+        int[] linked = new int[1];
+        //连接到着色器程序
+        GLES20.glLinkProgram(mProgram);
+        GLES20.glGetProgramiv(mProgram, GLES20.GL_LINK_STATUS, linked, 0);
+        if(linked[0] == 0) {
+            GLES20.glDeleteShader(mProgram);
+        }
+        link = linked[0];
+
+        return link;
     }
 }
