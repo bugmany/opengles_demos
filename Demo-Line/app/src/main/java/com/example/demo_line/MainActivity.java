@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     private GLSurfaceView mSurfaceView = null;
 
     private float[] vertexCoords = new float[]{
-            0.5f, 0.5f, 0.0f,
+            0.0f, 0.5f, 0.0f,
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
     };
@@ -158,10 +158,15 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 //        GLES20.glVertexAttribPointer(1, 4, GLES20.GL_FLOAT, false, 0, colorBuffer);
 //        GLES20.glEnableVertexAttribArray(1);
 
+        //绘制点
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 3);
 
+//        //绘制线
 //        GLES20.glLineWidth(10);
 //        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, 3);
+//
+//        //绘制三角形
+//        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 3);
 
         GLES20.glDisableVertexAttribArray(positionHandle);
         GLES20.glDisableVertexAttribArray(colorHandle);
