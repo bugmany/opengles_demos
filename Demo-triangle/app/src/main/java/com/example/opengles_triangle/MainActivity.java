@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             "attribute vec4 vPosition;" +
             "void main() {" +
             "   gl_Position = vPosition;" +
+            "   gl_PointSize = 10.0;" +
             "}";
 
     private final float[] vertexCoords = new float[] {
@@ -133,16 +134,18 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
         //获取顶点着色器的 vPosition 成员句柄
         int positionHandle = GLES20.glGetAttribLocation(vertexProgram, "vPosition");
+
+        //设置顶点坐标数据
+        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 3 * 4, vertexFloatBuffer);
+
         //启用句柄
         GLES20.glEnableVertexAttribArray(positionHandle);
-        //设置顶点坐标数据
-//        GLES20.glVertexAttribIPointer(positionHandle, 3, GLES20.GL_FLOAT, 3 * 4, fragmentFloatBuffer);
-        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 3 * 4, vertexFloatBuffer);
 
         //获取片元着色器的 vColor 成员句柄
         int colorHandle = GLES20.glGetUniformLocation(vertexProgram, "vColor");
         //设置颜色
         GLES20.glUniform4fv(colorHandle, 1, color, 0);
+
         //绘制三角形
         //1.绘制的API还可以是glDrawArrays，这里不需要明确的设置绘制的顺序，而是通过绘制的模式来决定的
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 3);
