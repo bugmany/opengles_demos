@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             "}";
 
     private final float color[] = {
-            1.0f, 0.0f, 0.0f, 1.0f
-            };
+            1.0f, 0.0f, 0.0f, 1.0f,
+    };
 
 //    //绘制三角形顺序, 暂时可以不用
 //    private static final short indices[] = {
