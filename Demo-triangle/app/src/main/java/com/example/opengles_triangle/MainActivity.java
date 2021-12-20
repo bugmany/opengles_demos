@@ -94,16 +94,8 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderResource);
 
         //构建着色器程序，并将顶点着色器和片段着色器链接进来
-        vertexProgram = GLES20.glCreateProgram();
-        GLES20.glAttachShader(vertexProgram, vertexShader);
-        GLES20.glAttachShader(vertexProgram, fragmentShader);
-
-        int[] link = new int[1];
-        GLES20.glLinkProgram(vertexProgram);
-        GLES20.glGetProgramiv(vertexProgram, GLES20.GL_LINK_STATUS, link, 0);
-        if(link[0] == 0) {
-
-        }
+        int shader[] = {vertexShader, fragmentShader};
+        int linkk = linkProgram(shader);
 
         //顶点着色器和片段着色器链接到着色器程序后就无用了
         GLES20.glDeleteShader(vertexShader);
@@ -181,5 +173,24 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             }
         }
         return shader;
+    }
+
+    public int linkProgram(int[] shaderId) {
+        int ret = 0;
+
+        vertexProgram = GLES20.glCreateProgram();
+        for (int i = 0; i<shaderId.length; i++) {
+            GLES20.glAttachShader(vertexProgram, shaderId[i]);
+        }
+
+        int[] link = new int[1];
+        GLES20.glLinkProgram(vertexProgram);
+        GLES20.glGetProgramiv(vertexProgram, GLES20.GL_LINK_STATUS, link, 0);
+        if(link[0] == 0) {
+
+        }
+        ret = link[0];
+
+        return ret;
     }
 }
