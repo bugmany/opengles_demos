@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -50,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             0.5f,   -0.5f,  0.0f,      // bottom right
             0.5f,   0.5f,   0.0f       // top right
     };
+
+    //圆形顶点坐标
+    private float circularCoords[];
 
     //设置颜色，依次为红绿蓝和透明通道
     private float color[] = {
@@ -139,10 +143,20 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //获取片元着色器的vColor成员的句柄
         aColorLocation = GLES20.glGetAttribLocation(mProgram, "aColor");
 
-        ByteBuffer bb = ByteBuffer.allocateDirect(triangleCoords.length * 4);
+        //矩形
+//        ByteBuffer bb = ByteBuffer.allocateDirect(triangleCoords.length * 4);
+//        bb.order(ByteOrder.nativeOrder());
+//        vertexBuffer = bb.asFloatBuffer();
+//        vertexBuffer.put(triangleCoords);
+//        vertexBuffer.position(0);
+
+        createPositions(1,6);  //60 - 圆形，6 - 六边形
+
+        //圆
+        ByteBuffer bb = ByteBuffer.allocateDirect(circularCoords.length * 4);
         bb.order(ByteOrder.nativeOrder());
         vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(triangleCoords);
+        vertexBuffer.put(circularCoords);
         vertexBuffer.position(0);
 
         ByteBuffer cc = ByteBuffer.allocateDirect(index.length * 4);
@@ -206,7 +220,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //绘制三角形
 //        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vertexCount);
         //索引法绘制正方形
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, index.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+//        GLES20.glDrawElements(GLES20.GL_TRIANGLES, index.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+        //绘制圆形
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, circularCoords.length/3);
 
         //禁止顶点数组的句柄
         GLES20.glDisableVertexAttribArray(aPoisitionLocation);
@@ -247,5 +263,46 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         link = linked[0];
 
         return link;
+    }
+
+    /**
+     * 绘制圆形
+     * @param radius - 半径
+     * @param n      - 三角形个数
+     */
+    private void createPositions(int radius, int n){
+        ArrayList<Float> data = new ArrayList<>();
+        //设置圆心坐标
+        data.add(0.0f);
+        data.add(0.0f);
+        data.add(0.0f);
+        float angDegSpan = 360f/n;
+        for(float i = 0; i < 360+angDegSpan; i += angDegSpan){
+            data.add((float) (radius*Math.sin(i*Math.PI/180f)));
+            data.add((float)(radius*Math.cos(i*Math.PI/180f)));
+            data.add(0.0f);
+        }
+        float[] f = new float[data.size()];
+        for (int i = 0; i<f.length; i++){
+            f[i] = data.get(i);
+        }
+
+        circularCoords = f;
+
+//        //处理各个顶点的颜色
+//        color = new float[f.length*4/3];
+//        ArrayList<Float> tempC = new ArrayList<>();
+//        ArrayList<Float> totalC = new ArrayList<>();
+//        tempC.add(1.0f);
+//        tempC.add(0.0f);
+//        tempC.add(0.0f);
+//        tempC.add(1.0f);
+//        for (int i=0;i<f.length/3;i++){
+//            totalC.addAll(tempC);
+//        }
+//
+//        for (int i=0; i<totalC.size();i++){
+//            color[i] = totalC.get(i);
+//        }
     }
 }
