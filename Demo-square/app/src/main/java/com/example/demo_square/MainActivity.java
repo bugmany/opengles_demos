@@ -229,6 +229,12 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glDisableVertexAttribArray(aColorLocation);
     }
 
+    /**
+     * 装载shader脚本
+     * @param shaderType         - shader 类型
+     * @param shaderResource     - shader code
+     * @return
+     */
     public int loadShader(int shaderType, String shaderResource) {
         int shader = GLES20.glCreateShader(shaderType);
         if(shader != 0) {
@@ -246,6 +252,11 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         return shader;
     }
 
+    /**
+     * shader 与程序链接
+     * @param shaderId - shader id
+     * @return
+     */
     public int linkProgram(int[] shaderId) {
         int link = 0;
         //创建一个空的OpenGLES程序
