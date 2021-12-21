@@ -29,8 +29,11 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     private final String vertexShaderCode =
             "attribute vec4 vPosition;" +
             "uniform mat4 vMatrix;"+
+            "attribute vec4 aColor;" +
+            "varying vec4 vColor;" +
             "void main() {" +
             "  gl_Position = vMatrix * vPosition;" +
+            "  vColor = aColor;" +
             "}";
 
     private final String fragmentShaderCode =
@@ -44,21 +47,25 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     static final int COORDS_PER_VERTEX = 3;
     static float triangleCoords[] = {
-            -0.5f,  0.5f, 0.0f, // top left
-            -0.5f, -0.5f, 0.0f, // bottom left
-            0.5f, -0.5f, 0.0f, // bottom right
-            0.5f,  0.5f, 0.0f  // top right
+            -0.5f,  0.5f,   0.0f,     // top left
+            -0.5f,  -0.5f,  0.0f,     // bottom left
+            0.5f,   -0.5f,  0.0f,      // bottom right
+            0.5f,   0.5f,   0.0f       // top right
     };
 
     static short index[]={
-            0,1,2,0,2,3
+            0,1,2,
+            0,2,3
     };
 
     private int mPositionHandle;
     private int mColorHandle;
 
+    //相机矩阵
     private float[] mViewMatrix = new float[16];
+    //投影矩阵
     private float[] mProjectMatrix = new float[16];
+    //变换矩阵
     private float[] mMVPMatrix = new float[16];
 
     //顶点个数
@@ -69,7 +76,16 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     private int mMatrixHandler;
 
     //设置颜色，依次为红绿蓝和透明通道
-    float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+    float color[] = {
+            1.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    //位置
+    private int aPoisitionLocation;
+    //颜色
+    private int aColorLocation;
+    //变换矩阵
+    private int uMatrixLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         mSurfaceView.setEGLContextClientVersion(2);
         mSurfaceView.setRenderer(this);
         mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-//        mSurfaceView.setVisibility(View.VISIBLE);
         mSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
@@ -101,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        //开启深度测试
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        //开启深度测试，绘制平面图时不需要开启，否则看不到图像
+//        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
@@ -116,13 +131,17 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         //将程序加入到OpenGLES2.0环境
         GLES20.glUseProgram(mProgram);
 
+        uMatrixLocation = GLES20.glGetUniformLocation(mProgram, "vMatrix");
+        aPoisitionLocation = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        aColorLocation = GLES20.glGetAttribLocation(mProgram, "aColor");
+
         ByteBuffer bb = ByteBuffer.allocateDirect(triangleCoords.length * 4);
         bb.order(ByteOrder.nativeOrder());
         vertexBuffer = bb.asFloatBuffer();
         vertexBuffer.put(triangleCoords);
         vertexBuffer.position(0);
 
-        ByteBuffer cc= ByteBuffer.allocateDirect(index.length*2);
+        ByteBuffer cc = ByteBuffer.allocateDirect(index.length * 2);
         cc.order(ByteOrder.nativeOrder());
         indexBuffer=cc.asShortBuffer();
         indexBuffer.put(index);
@@ -150,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         //获取变换矩阵vMatrix成员句柄
-        mMatrixHandler= GLES20.glGetUniformLocation(mProgram,"vMatrix");
+        mMatrixHandler = GLES20.glGetUniformLocation(mProgram, "vMatrix");
         //指定vMatrix的值
         GLES20.glUniformMatrix4fv(mMatrixHandler, 1, false, mMVPMatrix, 0);
 
@@ -173,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
         //禁止顶点数组的句柄
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+        GLES20.glDisableVertexAttribArray(mColorHandle);
     }
 
     public int loadShader(int shaderType, String shaderResource) {
