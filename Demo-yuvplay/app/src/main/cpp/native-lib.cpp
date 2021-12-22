@@ -11,12 +11,9 @@
 //顶点着色器，每个顶点执行一次，可以并行执行
 #define GET_STR(x) #x
 static const char *vertexShader = GET_STR(
-        attribute
-        vec4 aPosition;//输入的顶点坐标，会在程序指定将数据输入到该字段
-        attribute
-        vec2 aTextCoord;//输入的纹理坐标，会在程序指定将数据输入到该字段
-        varying
-        vec2 vTextCoord;//输出的纹理坐标
+        attribute vec4 aPosition;//输入的顶点坐标，会在程序指定将数据输入到该字段
+        attribute vec2 aTextCoord;//输入的纹理坐标，会在程序指定将数据输入到该字段
+        varying vec2 vTextCoord;//输出的纹理坐标
         void main() {
             //这里其实是将上下翻转过来（因为安卓图片会自动上下翻转，所以转回来）
             vTextCoord = vec2(aTextCoord.x, 1.0 - aTextCoord.y);
@@ -26,17 +23,12 @@ static const char *vertexShader = GET_STR(
 );
 //图元被光栅化为多少片段，就被调用多少次
 static const char *fragYUV420P = GET_STR(
-        precision
-        mediump float;
-        varying
-        vec2 vTextCoord;
+        precision mediump float;
+        varying vec2 vTextCoord;
         //输入的yuv三个纹理
-        uniform
-        sampler2D yTexture;//采样器
-        uniform
-        sampler2D uTexture;//采样器
-        uniform
-        sampler2D vTexture;//采样器
+        uniform sampler2D yTexture;//采样器
+        uniform sampler2D uTexture;//采样器
+        uniform sampler2D vTexture;//采样器
         void main() {
             vec3 yuv;
             vec3 rgb;
@@ -55,17 +47,13 @@ static const char *fragYUV420P = GET_STR(
         }
 );
 
-
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_example_yuvopengldemo_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
+Java_com_example_yuvopengldemo_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */) {
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
 }
 
 GLint initShader(const char *source, int type);
-
 
 GLint initShader(const char *source, GLint type) {
     //创建shader
@@ -217,7 +205,6 @@ Java_com_example_yuvopengldemo_YuvPlayer_loadYuv(JNIEnv *env, jobject thiz, jstr
 
     //纹理初始化
     //设置纹理层对应的对应采样器？
-
     /**
      *  //获取一致变量的存储位置
     GLint textureUniformY = glGetUniformLocation(program, "SamplerY");
@@ -346,5 +333,5 @@ Java_com_example_yuvopengldemo_YuvPlayer_loadYuv(JNIEnv *env, jobject thiz, jstr
         //窗口显示，交换双缓冲区
         eglSwapBuffers(display, winSurface);
     }
-
 }
+
