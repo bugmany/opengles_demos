@@ -55,6 +55,8 @@ Java_com_example_yuvopengldemo_MainActivity_stringFromJNI(JNIEnv *env, jobject /
 
 GLint initShader(const char *source, int type);
 
+GLint linkProgram(GLint shaderId[], int len);
+
 GLint initShader(const char *source, GLint type) {
     //创建shader
     GLint sh = glCreateShader(type);
@@ -81,6 +83,33 @@ GLint initShader(const char *source, GLint type) {
 
     LOGD("glCompileShader %d success", type);
     return sh;
+}
+
+GLint linkProgram(GLint shaderId[], int len) {
+    //创建渲染程序
+    GLint program = glCreateProgram();
+    if (program == 0) {
+        LOGD("glCreateProgram failed");
+        return -1;
+    }
+
+    //向渲染程序中加入着色器
+    for(int i = 0; i < len; i++) {
+        glAttachShader(program, shaderId[i]);
+    }
+
+    //链接程序
+    glLinkProgram(program);
+    GLint status = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    if (status == 0) {
+        LOGD("glLinkProgram failed");
+        return -1;
+    }
+    LOGD("glLinkProgram success");
+    //激活渲染程序
+    glUseProgram(program);
+    return program;
 }
 
 extern "C"
@@ -154,28 +183,12 @@ Java_com_example_yuvopengldemo_YuvPlayer_loadYuv(JNIEnv *env, jobject thiz, jstr
     GLint vsh = initShader(vertexShader, GL_VERTEX_SHADER);
     GLint fsh = initShader(fragYUV420P, GL_FRAGMENT_SHADER);
 
-    //创建渲染程序
-    GLint program = glCreateProgram();
-    if (program == 0) {
-        LOGD("glCreateProgram failed");
-        return;
+//    //创建渲染程序
+    GLint shaderId[] = {vsh, fsh};
+    GLint program = linkProgram(shaderId, 2);
+    if(program == 0) {
+        LOGD("Link program failed.\n");
     }
-
-    //向渲染程序中加入着色器
-    glAttachShader(program, vsh);
-    glAttachShader(program, fsh);
-
-    //链接程序
-    glLinkProgram(program);
-    GLint status = 0;
-    glGetProgramiv(program, GL_LINK_STATUS, &status);
-    if (status == 0) {
-        LOGD("glLinkProgram failed");
-        return;
-    }
-    LOGD("glLinkProgram success");
-    //激活渲染程序
-    glUseProgram(program);
 
     //加入三维顶点数据
     static float ver[] = {
