@@ -10,12 +10,17 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class YuvPlayer extends GLSurfaceView implements Runnable, SurfaceHolder.Callback, GLSurfaceView.Renderer {
 
+    private final static String TAG = "YuvPlayer";
    // private final static String PATH = "/sdcard/sintel_640_360.yuv";
-    private final static String PATH = "/sdcard/video1_640_272.yuv";
+    private static String PATH = null;//"/storage/emulated/0/Android/data/com.example.yuvopengldemo/files/video1_640_272.yuv";    //"/sdcard/video1_640_272.yuv";
 
     public YuvPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
         setRenderer(this);
+    }
+
+    public static void setFilePath(String path) {
+        PATH = path;
     }
 
     @Override
@@ -35,7 +40,11 @@ public class YuvPlayer extends GLSurfaceView implements Runnable, SurfaceHolder.
 
     @Override
     public void run() {
-        loadYuv(PATH,getHolder().getSurface());
+        try {
+            loadYuv(PATH, getHolder().getSurface());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public native void loadYuv(String url, Object surface);
